@@ -8,8 +8,19 @@ import java.util.concurrent.TimeUnit
 
 object RetrofitClient {
 
-    // Backend URL
     private const val BASE_URL = "https://mobilbackend.onrender.com/"
+
+    private var authToken: String? = null
+
+    fun setToken(token: String) {
+        authToken = token
+    }
+
+    fun getToken(): String? = authToken
+
+    fun clearToken() {
+        authToken = null
+    }
 
     private val loggingInterceptor = HttpLoggingInterceptor().apply {
         level = HttpLoggingInterceptor.Level.BODY
@@ -17,6 +28,16 @@ object RetrofitClient {
 
     private val okHttpClient = OkHttpClient.Builder()
         .addInterceptor(loggingInterceptor)
+        .addInterceptor { chain ->
+            val original = chain.request()
+            val requestBuilder = original.newBuilder()
+
+            authToken?.let { token ->
+                requestBuilder.addHeader("Authorization", "Bearer $token")
+            }
+
+            chain.proceed(requestBuilder.build())
+        }
         .connectTimeout(30, TimeUnit.SECONDS)
         .readTimeout(30, TimeUnit.SECONDS)
         .writeTimeout(30, TimeUnit.SECONDS)

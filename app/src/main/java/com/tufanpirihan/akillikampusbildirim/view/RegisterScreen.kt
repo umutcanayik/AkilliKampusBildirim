@@ -3,8 +3,11 @@ package com.tufanpirihan.akillikampusbildirim.view
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -16,15 +19,34 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.tufanpirihan.akillikampusbildirim.viewmodel.AuthViewModel
 
 @Composable
-fun RegisterScreen(navController: NavHostController) {
+fun RegisterScreen(
+    navController: NavHostController,
+    viewModel: AuthViewModel = viewModel()
+) {
     var fullName by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var department by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
+    var passwordError by remember { mutableStateOf<String?>(null) }
+
+    val registerState by viewModel.registerState.collectAsState()
+
+    LaunchedEffect(registerState) {
+        when (registerState) {
+            is AuthViewModel.RegisterState.Success -> {
+                navController.navigate("login") {
+                    popUpTo("register") { inclusive = true }
+                }
+            }
+            else -> {}
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -37,10 +59,10 @@ fun RegisterScreen(navController: NavHostController) {
                 .fillMaxWidth(0.85f)
                 .clip(RoundedCornerShape(32.dp))
                 .background(Color(0xFF141414))
-                .padding(24.dp),
+                .padding(24.dp)
+                .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Logo Alanı
             Box(
                 modifier = Modifier
                     .size(80.dp)
@@ -52,7 +74,7 @@ fun RegisterScreen(navController: NavHostController) {
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                Text("🎓", color = Color.White, fontSize = 40.sp)
+                Text("🎓", fontSize = 40.sp)
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -66,152 +88,149 @@ fun RegisterScreen(navController: NavHostController) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Ad Soyad Input
             OutlinedTextField(
                 value = fullName,
                 onValueChange = { fullName = it },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color(0xFF1F1F1F), RoundedCornerShape(16.dp))
-                    .clip(RoundedCornerShape(16.dp)),
+                modifier = Modifier.fillMaxWidth(),
                 placeholder = { Text("Ad Soyad", color = Color(0xFF888888)) },
                 leadingIcon = {
-                    Box(
-                        modifier = Modifier
-                            .size(20.dp)
-                            .background(Color(0xFF555555), shape = CircleShape)
-                    )
+                    Icon(Icons.Filled.Person, contentDescription = null, tint = Color(0xFF888888))
                 },
-                colors = TextFieldDefaults.colors(
+                colors = OutlinedTextFieldDefaults.colors(
                     focusedContainerColor = Color(0xFF1F1F1F),
                     unfocusedContainerColor = Color(0xFF1F1F1F),
                     focusedTextColor = Color.White,
                     unfocusedTextColor = Color.White,
-                    focusedIndicatorColor = Color(0xFF2979FF),
-                    unfocusedIndicatorColor = Color.Transparent
-                )
+                    focusedBorderColor = Color(0xFF2979FF),
+                    unfocusedBorderColor = Color.Transparent,
+                    cursorColor = Color(0xFF2979FF)
+                ),
+                shape = RoundedCornerShape(16.dp),
+                singleLine = true
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
-            // Email Input
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color(0xFF1F1F1F), RoundedCornerShape(16.dp))
-                    .clip(RoundedCornerShape(16.dp)),
+                modifier = Modifier.fillMaxWidth(),
                 placeholder = { Text("E-posta", color = Color(0xFF888888)) },
                 leadingIcon = {
-                    Box(
-                        modifier = Modifier
-                            .size(20.dp)
-                            .background(Color(0xFF555555), shape = CircleShape)
-                    )
+                    Icon(Icons.Filled.Email, contentDescription = null, tint = Color(0xFF888888))
                 },
-                colors = TextFieldDefaults.colors(
+                colors = OutlinedTextFieldDefaults.colors(
                     focusedContainerColor = Color(0xFF1F1F1F),
                     unfocusedContainerColor = Color(0xFF1F1F1F),
                     focusedTextColor = Color.White,
                     unfocusedTextColor = Color.White,
-                    focusedIndicatorColor = Color(0xFF2979FF),
-                    unfocusedIndicatorColor = Color.Transparent
-                )
+                    focusedBorderColor = Color(0xFF2979FF),
+                    unfocusedBorderColor = Color.Transparent,
+                    cursorColor = Color(0xFF2979FF)
+                ),
+                shape = RoundedCornerShape(16.dp),
+                singleLine = true
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
-            // Birim Input
             OutlinedTextField(
                 value = department,
                 onValueChange = { department = it },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color(0xFF1F1F1F), RoundedCornerShape(16.dp))
-                    .clip(RoundedCornerShape(16.dp)),
+                modifier = Modifier.fillMaxWidth(),
                 placeholder = { Text("Birim", color = Color(0xFF888888)) },
                 leadingIcon = {
-                    Box(
-                        modifier = Modifier
-                            .size(20.dp)
-                            .background(Color(0xFF555555), shape = CircleShape)
-                    )
+                    Icon(Icons.Filled.Business, contentDescription = null, tint = Color(0xFF888888))
                 },
-                colors = TextFieldDefaults.colors(
+                colors = OutlinedTextFieldDefaults.colors(
                     focusedContainerColor = Color(0xFF1F1F1F),
                     unfocusedContainerColor = Color(0xFF1F1F1F),
                     focusedTextColor = Color.White,
                     unfocusedTextColor = Color.White,
-                    focusedIndicatorColor = Color(0xFF2979FF),
-                    unfocusedIndicatorColor = Color.Transparent
-                )
+                    focusedBorderColor = Color(0xFF2979FF),
+                    unfocusedBorderColor = Color.Transparent,
+                    cursorColor = Color(0xFF2979FF)
+                ),
+                shape = RoundedCornerShape(16.dp),
+                singleLine = true
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
-            // Şifre Input
             OutlinedTextField(
                 value = password,
-                onValueChange = { password = it },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color(0xFF1F1F1F), RoundedCornerShape(16.dp))
-                    .clip(RoundedCornerShape(16.dp)),
+                onValueChange = {
+                    password = it
+                    passwordError = null
+                },
+                modifier = Modifier.fillMaxWidth(),
                 placeholder = { Text("Şifre", color = Color(0xFF888888)) },
                 visualTransformation = PasswordVisualTransformation(),
                 leadingIcon = {
-                    Box(
-                        modifier = Modifier
-                            .size(20.dp)
-                            .background(Color(0xFF555555), shape = CircleShape)
-                    )
+                    Icon(Icons.Filled.Lock, contentDescription = null, tint = Color(0xFF888888))
                 },
-                colors = TextFieldDefaults.colors(
+                colors = OutlinedTextFieldDefaults.colors(
                     focusedContainerColor = Color(0xFF1F1F1F),
                     unfocusedContainerColor = Color(0xFF1F1F1F),
                     focusedTextColor = Color.White,
                     unfocusedTextColor = Color.White,
-                    focusedIndicatorColor = Color(0xFF2979FF),
-                    unfocusedIndicatorColor = Color.Transparent
-                )
+                    focusedBorderColor = Color(0xFF2979FF),
+                    unfocusedBorderColor = Color.Transparent,
+                    cursorColor = Color(0xFF2979FF)
+                ),
+                shape = RoundedCornerShape(16.dp),
+                singleLine = true
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
-            // Şifre Tekrar Input
             OutlinedTextField(
                 value = confirmPassword,
-                onValueChange = { confirmPassword = it },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color(0xFF1F1F1F), RoundedCornerShape(16.dp))
-                    .clip(RoundedCornerShape(16.dp)),
+                onValueChange = {
+                    confirmPassword = it
+                    passwordError = null
+                },
+                modifier = Modifier.fillMaxWidth(),
                 placeholder = { Text("Şifre Tekrar", color = Color(0xFF888888)) },
                 visualTransformation = PasswordVisualTransformation(),
                 leadingIcon = {
-                    Box(
-                        modifier = Modifier
-                            .size(20.dp)
-                            .background(Color(0xFF555555), shape = CircleShape)
-                    )
+                    Icon(Icons.Filled.Lock, contentDescription = null, tint = Color(0xFF888888))
                 },
-                colors = TextFieldDefaults.colors(
+                isError = passwordError != null,
+                colors = OutlinedTextFieldDefaults.colors(
                     focusedContainerColor = Color(0xFF1F1F1F),
                     unfocusedContainerColor = Color(0xFF1F1F1F),
                     focusedTextColor = Color.White,
                     unfocusedTextColor = Color.White,
-                    focusedIndicatorColor = Color(0xFF2979FF),
-                    unfocusedIndicatorColor = Color.Transparent
-                )
+                    focusedBorderColor = Color(0xFF2979FF),
+                    unfocusedBorderColor = Color.Transparent,
+                    errorBorderColor = Color(0xFFFF5252),
+                    cursorColor = Color(0xFF2979FF)
+                ),
+                shape = RoundedCornerShape(16.dp),
+                singleLine = true
             )
+
+            if (passwordError != null) {
+                Text(
+                    text = passwordError!!,
+                    color = Color(0xFFFF5252),
+                    fontSize = 12.sp,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 16.dp, top = 4.dp)
+                )
+            }
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Kayıt Ol Butonu
             Button(
                 onClick = {
-                    // Kayıt işlemi
+                    if (password != confirmPassword) {
+                        passwordError = "Şifreler uyuşmuyor"
+                    } else {
+                        viewModel.register(fullName, email, password, department)
+                    }
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -219,20 +238,35 @@ fun RegisterScreen(navController: NavHostController) {
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFF2979FF)
                 ),
-                shape = RoundedCornerShape(20.dp)
+                shape = RoundedCornerShape(20.dp),
+                enabled = registerState !is AuthViewModel.RegisterState.Loading
             ) {
+                if (registerState is AuthViewModel.RegisterState.Loading) {
+                    CircularProgressIndicator(
+                        color = Color.White,
+                        modifier = Modifier.size(24.dp)
+                    )
+                } else {
+                    Text(
+                        text = "KAYIT OL",
+                        fontSize = 17.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+            }
+
+            if (registerState is AuthViewModel.RegisterState.Error) {
+                Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "KAYIT OL",
-                    fontSize = 17.sp,
-                    fontWeight = FontWeight.SemiBold
+                    text = (registerState as AuthViewModel.RegisterState.Error).message,
+                    color = Color(0xFFFF5252),
+                    fontSize = 14.sp
                 )
             }
 
-            // Giriş Yap Linki
+            Spacer(modifier = Modifier.height(16.dp))
+
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 16.dp),
                 horizontalArrangement = Arrangement.Center
             ) {
                 Text(

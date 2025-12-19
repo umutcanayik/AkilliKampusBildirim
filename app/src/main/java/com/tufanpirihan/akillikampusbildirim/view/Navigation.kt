@@ -19,6 +19,9 @@ fun AppNavigation() {
         composable("register") {
             RegisterScreen(navController = navController)
         }
+        composable("forgot_password") {
+            ForgotPasswordScreen(navController = navController)
+        }
         composable("home") {
             HomeScreen(navController = navController)
         }
@@ -26,10 +29,10 @@ fun AppNavigation() {
             CreateNotificationScreen(navController = navController)
         }
         composable("notification_detail/{notificationId}") { backStackEntry ->
-            val notificationId = backStackEntry.arguments?.getString("notificationId")
+            val notificationId = backStackEntry.arguments?.getString("notificationId") ?: ""
             NotificationDetailScreen(
                 navController = navController,
-                notificationId = notificationId ?: ""
+                notificationId = notificationId
             )
         }
     }

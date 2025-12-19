@@ -5,6 +5,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -19,7 +22,6 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.tufanpirihan.akillikampusbildirim.viewmodel.AuthViewModel
-import com.tufanpirihan.akillikampusbildirim.viewmodel.LoginState
 
 @Composable
 fun LoginScreen(
@@ -31,16 +33,12 @@ fun LoginScreen(
 
     val loginState by viewModel.loginState.collectAsState()
 
-    // Login state kontrolü
     LaunchedEffect(loginState) {
         when (loginState) {
-            is LoginState.Success -> {
+            is AuthViewModel.LoginState.Success -> {
                 navController.navigate("home") {
                     popUpTo("login") { inclusive = true }
                 }
-            }
-            is LoginState.Error -> {
-                // Hata durumunda özel bir işlem yapmak isterseniz buraya ekleyebilirsiniz
             }
             else -> {}
         }
@@ -60,7 +58,6 @@ fun LoginScreen(
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Logo Alanı
             Box(
                 modifier = Modifier
                     .size(100.dp)
@@ -72,7 +69,7 @@ fun LoginScreen(
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                Text("🎓", color = Color.White, fontSize = 50.sp)
+                Text("🎓", fontSize = 50.sp)
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -94,125 +91,120 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Email Input
-            Box(modifier = Modifier.fillMaxWidth()) {
-                OutlinedTextField(
-                    value = email,
-                    onValueChange = { email = it },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(Color(0xFF1F1F1F), RoundedCornerShape(16.dp))
-                        .clip(RoundedCornerShape(16.dp)),
-                    placeholder = { Text("E-posta", color = Color(0xFF888888)) },
-                    leadingIcon = {
-                        Box(
-                            modifier = Modifier
-                                .size(20.dp)
-                                .background(Color(0xFF555555), shape = CircleShape)
-                        )
-                    },
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = Color(0xFF1F1F1F),
-                        unfocusedContainerColor = Color(0xFF1F1F1F),
-                        focusedTextColor = Color.White,
-                        unfocusedTextColor = Color.White,
-                        focusedIndicatorColor = Color(0xFF2979FF),
-                        unfocusedIndicatorColor = Color.Transparent
+            OutlinedTextField(
+                value = email,
+                onValueChange = { email = it },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(16.dp)),
+                placeholder = { Text("E-posta", color = Color(0xFF888888)) },
+                leadingIcon = {
+                    Icon(
+                        Icons.Filled.Email,
+                        contentDescription = null,
+                        tint = Color(0xFF888888)
                     )
-                )
-            }
+                },
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedContainerColor = Color(0xFF1F1F1F),
+                    unfocusedContainerColor = Color(0xFF1F1F1F),
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White,
+                    focusedBorderColor = Color(0xFF2979FF),
+                    unfocusedBorderColor = Color.Transparent,
+                    cursorColor = Color(0xFF2979FF)
+                ),
+                shape = RoundedCornerShape(16.dp),
+                singleLine = true
+            )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Şifre Input
-            Box(modifier = Modifier.fillMaxWidth()) {
-                OutlinedTextField(
-                    value = password,
-                    onValueChange = { password = it },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(Color(0xFF1F1F1F), RoundedCornerShape(16.dp))
-                        .clip(RoundedCornerShape(16.dp)),
-                    placeholder = { Text("Şifre", color = Color(0xFF888888)) },
-                    visualTransformation = PasswordVisualTransformation(),
-                    leadingIcon = {
-                        Box(
-                            modifier = Modifier
-                                .size(20.dp)
-                                .background(Color(0xFF555555), shape = CircleShape)
-                        )
-                    },
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = Color(0xFF1F1F1F),
-                        unfocusedContainerColor = Color(0xFF1F1F1F),
-                        focusedTextColor = Color.White,
-                        unfocusedTextColor = Color.White,
-                        focusedIndicatorColor = Color(0xFF2979FF),
-                        unfocusedIndicatorColor = Color.Transparent
+            OutlinedTextField(
+                value = password,
+                onValueChange = { password = it },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(16.dp)),
+                placeholder = { Text("Şifre", color = Color(0xFF888888)) },
+                visualTransformation = PasswordVisualTransformation(),
+                leadingIcon = {
+                    Icon(
+                        Icons.Filled.Lock,
+                        contentDescription = null,
+                        tint = Color(0xFF888888)
                     )
-                )
-            }
+                },
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedContainerColor = Color(0xFF1F1F1F),
+                    unfocusedContainerColor = Color(0xFF1F1F1F),
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White,
+                    focusedBorderColor = Color(0xFF2979FF),
+                    unfocusedBorderColor = Color.Transparent,
+                    cursorColor = Color(0xFF2979FF)
+                ),
+                shape = RoundedCornerShape(16.dp),
+                singleLine = true
+            )
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Giriş Butonu
             Button(
-                onClick = {
-                    viewModel.login(email, password)
-                },
+                onClick = { viewModel.login(email, password) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFF2979FF)
                 ),
-                shape = RoundedCornerShape(20.dp)
+                shape = RoundedCornerShape(20.dp),
+                enabled = loginState !is AuthViewModel.LoginState.Loading
             ) {
-                Text(
-                    text = "GİRİŞ YAP",
-                    fontSize = 17.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
+                if (loginState is AuthViewModel.LoginState.Loading) {
+                    CircularProgressIndicator(
+                        color = Color.White,
+                        modifier = Modifier.size(24.dp)
+                    )
+                } else {
+                    Text(
+                        text = "GİRİŞ YAP",
+                        fontSize = 17.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
             }
 
-            // Login State göstergesi
-            when (val state = loginState) {
-                is LoginState.Loading -> CircularProgressIndicator(color = Color(0xFF2979FF))
-                is LoginState.Error -> Text(
-                    text = state.message,
-                    color = Color.Red,
+            if (loginState is AuthViewModel.LoginState.Error) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = (loginState as AuthViewModel.LoginState.Error).message,
+                    color = Color(0xFFFF5252),
                     fontSize = 14.sp
                 )
-                is LoginState.Success -> Text(
-                    text = "Giriş Başarılı!",
-                    color = Color.Green,
-                    fontSize = 14.sp
-                )
-                else -> {}
             }
 
-            // Şifremi Unuttum
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "Şifremi unuttum?",
-                    color = Color(0xFF2979FF),
-                    fontSize = 13.sp
-                )
-            }
+            Spacer(modifier = Modifier.height(16.dp))
 
-            // Kayıt Linki
+            Text(
+                text = "Şifremi unuttum?",
+                color = Color(0xFF2979FF),
+                fontSize = 13.sp,
+                modifier = Modifier.clickable {
+                    navController.navigate("forgot_password")
+                }
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp),
                 horizontalArrangement = Arrangement.Center
             ) {
-
+                Text(
+                    text = "Hesabın yok mu? ",
+                    color = Color(0xFF888888),
+                    fontSize = 14.sp
+                )
                 Text(
                     text = "Kayıt Ol",
                     color = Color(0xFF2979FF),
