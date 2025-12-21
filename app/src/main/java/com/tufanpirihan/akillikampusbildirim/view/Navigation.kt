@@ -28,11 +28,11 @@ fun AppNavigation() {
         composable("create_notification") {
             CreateNotificationScreen(navController = navController)
         }
-        composable("notification_detail/{notificationId}") { backStackEntry ->
-            val notificationId = backStackEntry.arguments?.getString("notificationId") ?: ""
+        composable("notification_detail/{notificationJson}") { backStackEntry ->
+            val notificationJson = backStackEntry.arguments?.getString("notificationJson") ?: ""
             NotificationDetailScreen(
                 navController = navController,
-                notificationId = notificationId
+                notificationJson = notificationJson
             )
         }
     }

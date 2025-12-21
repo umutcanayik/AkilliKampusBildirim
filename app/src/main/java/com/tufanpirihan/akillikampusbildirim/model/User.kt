@@ -3,15 +3,12 @@ package com.tufanpirihan.akillikampusbildirim.model
 import com.google.gson.annotations.SerializedName
 
 data class User(
-    @SerializedName("ID") val id: String = "",
-    @SerializedName("FullName") val fullName: String = "",
-    @SerializedName("Email") val email: String = "",
-    @SerializedName("Role") val role: String = "USER",
-    @SerializedName("Department") val department: String = "",
-    @SerializedName("CreatedAt") val createdAt: String = ""
+    val id: String = "",
+    val email: String = "",
+    @SerializedName("full_name") val fullName: String = "",
+    val department: String = "",
+    val role: String = "user",
+    @SerializedName("notification_prefs") val notificationPrefs: List<String> = emptyList(),
+    @SerializedName("followed_reports") val followedReports: List<String> = emptyList(),
+    @SerializedName("created_at") val createdAt: String = ""
 )
-
-enum class UserRole {
-    USER,
-    ADMIN
-}

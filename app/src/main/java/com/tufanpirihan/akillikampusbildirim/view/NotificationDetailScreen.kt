@@ -12,31 +12,32 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import coil.compose.AsyncImage
+import com.google.gson.Gson
 import com.tufanpirihan.akillikampusbildirim.model.Notification
-import com.tufanpirihan.akillikampusbildirim.viewmodel.NotificationDetailViewModel
+import com.tufanpirihan.akillikampusbildirim.model.FollowRequest
+import com.tufanpirihan.akillikampusbildirim.repository.RetrofitClient
+import kotlinx.coroutines.launch
+import java.net.URLDecoder
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotificationDetailScreen(
     navController: NavHostController,
-    notificationId: String,
-    viewModel: NotificationDetailViewModel = viewModel()
+    notificationJson: String
 ) {
-    LaunchedEffect(notificationId) {
-        viewModel.fetchNotificationDetails(notificationId)
+    val notification = remember {
+        try {
+            val decoded = URLDecoder.decode(notificationJson, "UTF-8")
+            Gson().fromJson(decoded, Notification::class.java)
+        } catch (e: Exception) {
+            null
+        }
     }
-
-    val notificationState by viewModel.notificationState.collectAsState()
-    val isFollowed by viewModel.isFollowed.collectAsState()
 
     Scaffold(
         topBar = {
@@ -55,39 +56,26 @@ fun NotificationDetailScreen(
         },
         containerColor = Color(0xFF050505)
     ) { padding ->
-        when (val state = notificationState) {
-            is NotificationDetailViewModel.NotificationState.Loading -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator(color = Color(0xFF2979FF))
+        if (notification == null) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("❌", fontSize = 48.sp)
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = "Bildirim yüklenemedi",
+                        color = Color(0xFFFF5252),
+                        fontSize = 16.sp
+                    )
                 }
             }
-            is NotificationDetailViewModel.NotificationState.Success -> {
-                NotificationDetailContent(
-                    notification = state.notification,
-                    isFollowed = isFollowed,
-                    onFollowToggle = { viewModel.toggleFollowNotification(notificationId) },
-                    modifier = Modifier.padding(padding)
-                )
-            }
-            is NotificationDetailViewModel.NotificationState.Error -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("❌", fontSize = 48.sp)
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text(
-                            text = state.message,
-                            color = Color(0xFFFF5252),
-                            fontSize = 16.sp
-                        )
-                    }
-                }
-            }
+        } else {
+            NotificationDetailContent(
+                notification = notification,
+                modifier = Modifier.padding(padding)
+            )
         }
     }
 }
@@ -95,10 +83,28 @@ fun NotificationDetailScreen(
 @Composable
 fun NotificationDetailContent(
     notification: Notification,
-    isFollowed: Boolean,
-    onFollowToggle: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var isFollowed by remember { mutableStateOf(false) }
+    var isLoading by remember { mutableStateOf(false) }
+    var isCheckingFollow by remember { mutableStateOf(true) }
+    val scope = rememberCoroutineScope()
+    val userId = RetrofitClient.getUserId()
+
+    LaunchedEffect(notification.id) {
+        if (userId != null) {
+            try {
+                val response = RetrofitClient.apiService.getFollowedReports(userId)
+                if (response.isSuccessful) {
+                    val followedList = response.body() ?: emptyList()
+                    isFollowed = followedList.any { it.id == notification.id }
+                }
+            } catch (e: Exception) {
+            }
+        }
+        isCheckingFollow = false
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -175,62 +181,36 @@ fun NotificationDetailContent(
             }
         }
 
-        notification.imageUrl?.let { imageUrl ->
-            Spacer(modifier = Modifier.height(16.dp))
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFF141414)),
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        text = "Fotoğraf",
-                        color = Color.White,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    AsyncImage(
-                        model = imageUrl,
-                        contentDescription = "Bildirim Fotoğrafı",
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(200.dp)
-                            .clip(RoundedCornerShape(12.dp)),
-                        contentScale = ContentScale.Crop
-                    )
-                }
-            }
-        }
-
         notification.location?.let { location ->
-            Spacer(modifier = Modifier.height(16.dp))
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFF141414)),
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            Icons.Filled.LocationOn,
-                            contentDescription = null,
-                            tint = Color(0xFF2979FF)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
+            if (location.lat != 0.0 || location.lng != 0.0) {
+                Spacer(modifier = Modifier.height(16.dp))
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFF141414)),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                Icons.Filled.LocationOn,
+                                contentDescription = null,
+                                tint = Color(0xFF2979FF)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Konum",
+                                color = Color.White,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "Konum",
-                            color = Color.White,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold
+                            text = "Enlem: ${location.lat}\nBoylam: ${location.lng}",
+                            color = Color(0xFF888888),
+                            fontSize = 14.sp
                         )
                     }
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Enlem: ${location.latitude}\nBoylam: ${location.longitude}",
-                        color = Color(0xFF888888),
-                        fontSize = 14.sp
-                    )
                 }
             }
         }
@@ -262,25 +242,58 @@ fun NotificationDetailContent(
         Spacer(modifier = Modifier.height(24.dp))
 
         Button(
-            onClick = onFollowToggle,
+            onClick = {
+                if (userId != null && !isLoading) {
+                    isLoading = true
+                    scope.launch {
+                        try {
+                            if (isFollowed) {
+                                val response = RetrofitClient.apiService.unfollowReport(
+                                    FollowRequest(userId = userId, reportId = notification.id)
+                                )
+                                if (response.isSuccessful) {
+                                    isFollowed = false
+                                }
+                            } else {
+                                val response = RetrofitClient.apiService.followReport(
+                                    FollowRequest(userId = userId, reportId = notification.id)
+                                )
+                                if (response.isSuccessful) {
+                                    isFollowed = true
+                                }
+                            }
+                        } catch (e: Exception) {
+                        }
+                        isLoading = false
+                    }
+                }
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = if (isFollowed) Color(0xFF424242) else Color(0xFF2979FF)
             ),
-            shape = RoundedCornerShape(16.dp)
+            shape = RoundedCornerShape(16.dp),
+            enabled = !isLoading && !isCheckingFollow && userId != null
         ) {
-            Icon(
-                if (isFollowed) Icons.Filled.Star else Icons.Filled.StarBorder,
-                contentDescription = null
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = if (isFollowed) "Takipten Çık" else "Bildirimi Takip Et",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Medium
-            )
+            if (isLoading || isCheckingFollow) {
+                CircularProgressIndicator(
+                    color = Color.White,
+                    modifier = Modifier.size(24.dp)
+                )
+            } else {
+                Icon(
+                    if (isFollowed) Icons.Filled.Star else Icons.Filled.StarBorder,
+                    contentDescription = null
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = if (isFollowed) "Takipten Çık" else "Bildirimi Takip Et",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(32.dp))

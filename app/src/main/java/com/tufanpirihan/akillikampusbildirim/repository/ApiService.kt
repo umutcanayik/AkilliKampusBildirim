@@ -38,6 +38,7 @@ interface ApiService {
         @Part("title") title: RequestBody,
         @Part("description") description: RequestBody,
         @Part("type") type: RequestBody,
+        @Part("user_id") userId: RequestBody,
         @Part("latitude") latitude: RequestBody?,
         @Part("longitude") longitude: RequestBody?,
         @Part image: MultipartBody.Part?
@@ -46,9 +47,10 @@ interface ApiService {
     @POST("follow")
     suspend fun followReport(@Body request: FollowRequest): Response<ApiResponse<Unit>>
 
-    @DELETE("follow/{reportId}")
-    suspend fun unfollowReport(@Path("reportId") reportId: String): Response<ApiResponse<Unit>>
-
     @GET("get-follow")
-    suspend fun getFollowedReports(): Response<List<Notification>>
+    suspend fun getFollowedReports(@Query("user_id") userId: String): Response<List<Notification>>
+
+    @HTTP(method = "DELETE", path = "follow", hasBody = true)
+    suspend fun unfollowReport(@Body request: FollowRequest): Response<ApiResponse<Unit>>
+
 }

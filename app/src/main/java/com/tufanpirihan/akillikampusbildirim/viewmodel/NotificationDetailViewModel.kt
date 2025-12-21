@@ -36,17 +36,21 @@ class NotificationDetailViewModel : ViewModel() {
         }
     }
 
-    fun toggleFollowNotification(notificationId: String) {
+    fun toggleFollowNotification(notificationId: String, userId: String) {
         viewModelScope.launch {
             try {
                 if (_isFollowed.value) {
-                    val response = RetrofitClient.apiService.unfollowReport(notificationId)
+                    val response = RetrofitClient.apiService.unfollowReport(
+                        FollowRequest(userId = userId, reportId = notificationId)
+                    )
                     if (response.isSuccessful) {
                         _isFollowed.value = false
                         updateNotificationFollowState(false)
                     }
                 } else {
-                    val response = RetrofitClient.apiService.followReport(FollowRequest(notificationId))
+                    val response = RetrofitClient.apiService.followReport(
+                        FollowRequest(userId = userId, reportId = notificationId)
+                    )
                     if (response.isSuccessful) {
                         _isFollowed.value = true
                         updateNotificationFollowState(true)

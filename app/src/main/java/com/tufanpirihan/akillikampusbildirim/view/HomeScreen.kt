@@ -25,6 +25,8 @@ import androidx.navigation.NavHostController
 import com.tufanpirihan.akillikampusbildirim.model.Notification
 import com.tufanpirihan.akillikampusbildirim.model.NotificationType
 import com.tufanpirihan.akillikampusbildirim.viewmodel.NotificationViewModel
+import java.net.URLEncoder
+import com.google.gson.Gson
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -208,7 +210,9 @@ fun HomeScreen(
                 ) {
                     items(notifications) { notification ->
                         NotificationCard(notification = notification) {
-                            navController.navigate("notification_detail/${notification.id}")
+                            val gson = Gson()
+                            val json = URLEncoder.encode(gson.toJson(notification), "UTF-8")
+                            navController.navigate("notification_detail/$json")
                         }
                     }
                 }

@@ -11,6 +11,7 @@ object RetrofitClient {
     private const val BASE_URL = "https://mobilbackend.onrender.com/"
 
     private var authToken: String? = null
+    private var userId: String? = null
 
     fun setToken(token: String) {
         authToken = token
@@ -18,8 +19,15 @@ object RetrofitClient {
 
     fun getToken(): String? = authToken
 
-    fun clearToken() {
+    fun setUserId(id: String) {
+        userId = id
+    }
+
+    fun getUserId(): String? = userId
+
+    fun clearSession() {
         authToken = null
+        userId = null
     }
 
     private val loggingInterceptor = HttpLoggingInterceptor().apply {

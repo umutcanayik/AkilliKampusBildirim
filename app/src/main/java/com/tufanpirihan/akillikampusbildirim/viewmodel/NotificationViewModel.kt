@@ -13,6 +13,7 @@ import kotlinx.coroutines.launch
 class NotificationViewModel : ViewModel() {
 
     private val _allNotifications = MutableStateFlow<List<Notification>>(emptyList())
+    private val _followedIds = MutableStateFlow<Set<String>>(emptySet())
 
     private val _notifications = MutableStateFlow<List<Notification>>(emptyList())
     val notifications: StateFlow<List<Notification>> = _notifications.asStateFlow()
@@ -37,6 +38,7 @@ class NotificationViewModel : ViewModel() {
 
     init {
         fetchNotifications()
+        fetchFollowedReports()
     }
 
     fun fetchNotifications() {
@@ -59,6 +61,21 @@ class NotificationViewModel : ViewModel() {
         }
     }
 
+    private fun fetchFollowedReports() {
+        val userId = RetrofitClient.getUserId() ?: return
+        viewModelScope.launch {
+            try {
+                val response = RetrofitClient.apiService.getFollowedReports(userId)
+                if (response.isSuccessful) {
+                    val followedReports = response.body() ?: emptyList()
+                    _followedIds.value = followedReports.map { it.id }.toSet()
+                    applyFilters()
+                }
+            } catch (e: Exception) {
+            }
+        }
+    }
+
     fun updateSearchQuery(query: String) {
         _searchQuery.value = query
         applyFilters()
@@ -76,6 +93,9 @@ class NotificationViewModel : ViewModel() {
 
     fun toggleShowOnlyFollowed() {
         _showOnlyFollowed.value = !_showOnlyFollowed.value
+        if (_showOnlyFollowed.value) {
+            fetchFollowedReports()
+        }
         applyFilters()
     }
 
@@ -92,7 +112,7 @@ class NotificationViewModel : ViewModel() {
                     notification.status.uppercase() == "AÇIK"
 
             val matchesFollowed = !_showOnlyFollowed.value ||
-                    notification.isFollowed
+                    _followedIds.value.contains(notification.id)
 
             matchesQuery && matchesType && matchesOpen && matchesFollowed
         }
@@ -117,5 +137,9 @@ class NotificationViewModel : ViewModel() {
         _showOnlyOpen.value = false
         _showOnlyFollowed.value = false
         applyFilters()
+    }
+
+    fun refreshFollowed() {
+        fetchFollowedReports()
     }
 }

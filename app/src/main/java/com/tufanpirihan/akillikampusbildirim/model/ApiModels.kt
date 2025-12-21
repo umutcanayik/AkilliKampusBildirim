@@ -1,5 +1,7 @@
 package com.tufanpirihan.akillikampusbildirim.model
 
+import com.google.gson.annotations.SerializedName
+
 data class LoginRequest(
     val email: String,
     val password: String
@@ -7,11 +9,12 @@ data class LoginRequest(
 
 data class LoginResponse(
     val token: String,
-    val user: User
+    val uid: String,
+    val message: String
 )
 
 data class RegisterRequest(
-    val fullName: String,
+    @SerializedName("full_name") val fullName: String,
     val email: String,
     val password: String,
     val department: String
@@ -19,7 +22,7 @@ data class RegisterRequest(
 
 data class RegisterResponse(
     val message: String,
-    val user: User
+    @SerializedName("user_id") val userId: String
 )
 
 data class ApiResponse<T>(
@@ -38,9 +41,10 @@ data class CreateNotificationRequest(
     val type: String,
     val latitude: Double?,
     val longitude: Double?,
-    val imageUrl: String? = null
+    @SerializedName("user_id") val userId: String? = null
 )
 
 data class FollowRequest(
-    val reportId: String
+    @SerializedName("user_id") val userId: String,
+    @SerializedName("report_id") val reportId: String
 )

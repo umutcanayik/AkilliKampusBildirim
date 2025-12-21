@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import com.tufanpirihan.akillikampusbildirim.model.ForgotPasswordRequest
 import com.tufanpirihan.akillikampusbildirim.model.LoginRequest
 import com.tufanpirihan.akillikampusbildirim.model.RegisterRequest
-import com.tufanpirihan.akillikampusbildirim.model.User
 import com.tufanpirihan.akillikampusbildirim.repository.RetrofitClient
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -23,9 +22,6 @@ class AuthViewModel : ViewModel() {
     private val _forgotPasswordState = MutableStateFlow<ForgotPasswordState>(ForgotPasswordState.Initial)
     val forgotPasswordState: StateFlow<ForgotPasswordState> = _forgotPasswordState.asStateFlow()
 
-    private val _currentUser = MutableStateFlow<User?>(null)
-    val currentUser: StateFlow<User?> = _currentUser.asStateFlow()
-
     fun login(email: String, password: String) {
         if (email.isBlank() || password.isBlank()) {
             _loginState.value = LoginState.Error("E-posta ve şifre boş olamaz")
@@ -40,7 +36,7 @@ class AuthViewModel : ViewModel() {
                 if (response.isSuccessful && response.body() != null) {
                     val loginResponse = response.body()!!
                     RetrofitClient.setToken(loginResponse.token)
-                    _currentUser.value = loginResponse.user
+                    RetrofitClient.setUserId(loginResponse.uid)
                     _loginState.value = LoginState.Success
                 } else {
                     _loginState.value = LoginState.Error("E-posta veya şifre hatalı")
@@ -102,8 +98,7 @@ class AuthViewModel : ViewModel() {
     }
 
     fun logout() {
-        RetrofitClient.clearToken()
-        _currentUser.value = null
+        RetrofitClient.clearSession()
         _loginState.value = LoginState.Initial
     }
 

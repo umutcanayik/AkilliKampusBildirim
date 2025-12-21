@@ -8,11 +8,11 @@ data class Notification(
     @SerializedName("Title") val title: String = "",
     @SerializedName("Description") val description: String = "",
     @SerializedName("Type") val type: String = "",
-    @SerializedName("Status") val status: String = "AÇIK",
+    @SerializedName("Status") val status: String = "Açık",
     @SerializedName("Location") val location: Location? = null,
     @SerializedName("CreatedAt") val createdAt: String = "",
-    @SerializedName("ImageUrl") val imageUrl: String? = null,
-    @SerializedName("IsFollowed") val isFollowed: Boolean = false
+    @SerializedName("UpdatedAt") val updatedAt: String = "",
+    val isFollowed: Boolean = false
 )
 
 enum class NotificationType(val displayName: String) {
@@ -30,6 +30,6 @@ enum class NotificationStatus(val displayName: String) {
 }
 
 data class Location(
-    @SerializedName("Lat") val latitude: Double = 0.0,
-    @SerializedName("Lng") val longitude: Double = 0.0
+    @SerializedName("Lat") val lat: Double = 0.0,
+    @SerializedName("Lng") val lng: Double = 0.0
 )

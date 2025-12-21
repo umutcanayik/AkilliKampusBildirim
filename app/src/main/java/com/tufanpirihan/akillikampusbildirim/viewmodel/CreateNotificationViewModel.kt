@@ -41,15 +41,21 @@ class CreateNotificationViewModel : ViewModel() {
             return
         }
 
+        val userId = RetrofitClient.getUserId()
+        if (userId == null) {
+            _notificationState.value = CreateNotificationState.Error("Oturum hatası, tekrar giriş yapın")
+            return
+        }
+
         viewModelScope.launch {
             _notificationState.value = CreateNotificationState.Loading
 
             try {
                 if (imageUri != null) {
                     val imageFile = uriToFile(imageUri, context)
-                    createNotificationWithImage(title, description, type, latitude, longitude, imageFile)
+                    createNotificationWithImage(title, description, type, latitude, longitude, userId, imageFile)
                 } else {
-                    createNotificationWithoutImage(title, description, type, latitude, longitude)
+                    createNotificationWithoutImage(title, description, type, latitude, longitude, userId)
                 }
             } catch (e: Exception) {
                 _notificationState.value = CreateNotificationState.Error(e.localizedMessage ?: "Bağlantı hatası")
@@ -62,14 +68,16 @@ class CreateNotificationViewModel : ViewModel() {
         description: String,
         type: NotificationType,
         latitude: Double?,
-        longitude: Double?
+        longitude: Double?,
+        userId: String
     ) {
         val request = CreateNotificationRequest(
             title = title,
             description = description,
             type = type.displayName,
             latitude = latitude,
-            longitude = longitude
+            longitude = longitude,
+            userId = userId
         )
 
         val response = RetrofitClient.apiService.createNotification(request)
@@ -86,11 +94,13 @@ class CreateNotificationViewModel : ViewModel() {
         type: NotificationType,
         latitude: Double?,
         longitude: Double?,
+        userId: String,
         imageFile: File?
     ) {
         val titleBody = title.toRequestBody("text/plain".toMediaTypeOrNull())
         val descriptionBody = description.toRequestBody("text/plain".toMediaTypeOrNull())
         val typeBody = type.displayName.toRequestBody("text/plain".toMediaTypeOrNull())
+        val userIdBody = userId.toRequestBody("text/plain".toMediaTypeOrNull())
         val latitudeBody = latitude?.toString()?.toRequestBody("text/plain".toMediaTypeOrNull())
         val longitudeBody = longitude?.toString()?.toRequestBody("text/plain".toMediaTypeOrNull())
 
@@ -100,7 +110,7 @@ class CreateNotificationViewModel : ViewModel() {
         }
 
         val response = RetrofitClient.apiService.createNotificationWithImage(
-            titleBody, descriptionBody, typeBody, latitudeBody, longitudeBody, imagePart
+            titleBody, descriptionBody, typeBody, userIdBody, latitudeBody, longitudeBody, imagePart
         )
 
         if (response.isSuccessful) {
