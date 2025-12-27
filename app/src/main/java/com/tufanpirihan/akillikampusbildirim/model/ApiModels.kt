@@ -48,3 +48,15 @@ data class FollowRequest(
     @SerializedName("user_id") val userId: String,
     @SerializedName("report_id") val reportId: String
 )
+
+data class ProfileResponse(
+    @SerializedName("full_name") val fullName: String,
+    val email: String,
+    val department: String,
+    val role: String
+)
+
+data class UpdateProfileRequest(
+    val department: String?,
+    @SerializedName("notification_prefs") val notificationPrefs: List<String>?
+)

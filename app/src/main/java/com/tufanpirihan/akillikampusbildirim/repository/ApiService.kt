@@ -18,10 +18,13 @@ interface ApiService {
     suspend fun forgotPassword(@Body request: ForgotPasswordRequest): Response<ApiResponse<Unit>>
 
     @GET("profile")
-    suspend fun getUserProfile(): Response<User>
+    suspend fun getUserProfile(@Query("user_id") userId: String): Response<ProfileResponse>
 
     @PUT("update-profile")
-    suspend fun updateProfile(@Body user: User): Response<User>
+    suspend fun updateProfile(
+        @Query("user_id") userId: String,
+        @Body request: UpdateProfileRequest
+    ): Response<ApiResponse<Unit>>
 
     @GET("get-reports")
     suspend fun getReports(): Response<List<Notification>>

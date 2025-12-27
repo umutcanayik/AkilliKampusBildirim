@@ -35,5 +35,11 @@ fun AppNavigation() {
                 notificationJson = notificationJson
             )
         }
+        composable("profile") {
+            ProfileScreen(navController = navController)
+        }
+        composable("map") {
+            MapScreen(navController = navController)
+        }
     }
 }

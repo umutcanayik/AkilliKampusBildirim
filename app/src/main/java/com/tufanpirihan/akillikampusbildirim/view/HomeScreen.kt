@@ -52,6 +52,13 @@ fun HomeScreen(
                     titleContentColor = Color.White
                 ),
                 actions = {
+                    IconButton(onClick = { navController.navigate("map") }) {
+                        Icon(
+                            Icons.Filled.Map,
+                            contentDescription = "Harita",
+                            tint = Color.White
+                        )
+                    }
                     IconButton(onClick = { navController.navigate("profile") }) {
                         Icon(
                             Icons.Filled.AccountCircle,
