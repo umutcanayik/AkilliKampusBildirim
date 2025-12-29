@@ -60,3 +60,15 @@ data class UpdateProfileRequest(
     val department: String?,
     @SerializedName("notification_prefs") val notificationPrefs: List<String>?
 )
+
+// Admin - Durum Güncelleme
+data class UpdateStatusRequest(
+    val status: String
+)
+
+// Admin - Acil Durum Bildirimi
+data class EmergencyNotification(
+    val title: String,
+    val message: String,
+    val priority: String = "HIGH"
+)

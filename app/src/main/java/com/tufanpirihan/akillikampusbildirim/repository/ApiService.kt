@@ -56,4 +56,16 @@ interface ApiService {
     @HTTP(method = "DELETE", path = "follow", hasBody = true)
     suspend fun unfollowReport(@Body request: FollowRequest): Response<ApiResponse<Unit>>
 
+
+    @PUT("reports/{id}/status")
+    suspend fun updateReportStatus(
+        @Path("id") reportId: String,
+        @Body status: UpdateStatusRequest
+    ): Response<Notification>
+
+    @POST("emergency")
+    suspend fun sendEmergencyNotification(
+        @Body notification: EmergencyNotification
+    ): Response<Unit>
+
 }

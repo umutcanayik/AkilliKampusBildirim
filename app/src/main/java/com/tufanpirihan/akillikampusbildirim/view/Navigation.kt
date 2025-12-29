@@ -41,5 +41,10 @@ fun AppNavigation() {
         composable("map") {
             MapScreen(navController = navController)
         }
+
+        composable("admin") {
+            AdminScreen(navController = navController)
+        }
+
     }
 }

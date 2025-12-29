@@ -66,6 +66,14 @@ fun HomeScreen(
                             tint = Color.White
                         )
                     }
+                    IconButton(onClick = { navController.navigate("admin") }) {
+                        Icon(
+                            Icons.Filled.ManageAccounts,
+                            contentDescription = "ADMİN",
+                            tint = Color.White
+                        )
+                    }
+
                 }
             )
         },
